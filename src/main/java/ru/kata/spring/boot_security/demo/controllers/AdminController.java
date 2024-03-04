@@ -3,10 +3,12 @@ package ru.kata.spring.boot_security.demo.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import ru.kata.spring.boot_security.demo.models.Role;
 import ru.kata.spring.boot_security.demo.models.User;
 import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,9 +26,17 @@ public class AdminController {
     }
 
     @GetMapping
-    public String showAllUsers(Model model) {
+    public String showAllUsers(Model model, Principal principal) {
+        User user = userService.getUserByEmail(principal.getName());
+
+        model.addAttribute("user", user);
+        model.addAttribute("roles", user.getRoles().stream()
+                .map(Role::getName).collect(Collectors.toSet()));
+        model.addAttribute("viewRoles", user.getRoles().stream()
+                .map(Role::getViewText).collect(Collectors.toSet()));
         model.addAttribute("users", userService.getAllUsers());
-        return "users_list";
+
+        return "desktop";
     }
 
     @GetMapping("/create")
