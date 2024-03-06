@@ -9,8 +9,7 @@ import ru.kata.spring.boot_security.demo.services.RoleService;
 import ru.kata.spring.boot_security.demo.services.UserService;
 
 import java.security.Principal;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -26,94 +25,101 @@ public class AdminController {
     }
 
     @GetMapping
-    public String showAllUsers(Model model, Principal principal) {
+    public String desktopPage(Model model, Principal principal) {
         User user = userService.getUserByEmail(principal.getName());
 
         model.addAttribute("user", user);
+
         model.addAttribute("roles", user.getRoles().stream()
                 .map(Role::getName).collect(Collectors.toSet()));
-        model.addAttribute("viewRoles", user.getRoles().stream()
-                .map(Role::getViewText).collect(Collectors.toSet()));
+
+        model.addAttribute("page", "PAGE_ADMIN");
+
         model.addAttribute("users", userService.getAllUsers());
+
+        model.addAttribute("usersViewRoles",
+                userService.getAllUsers()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                User::getId,
+                                u -> u.getRoles()
+                                        .stream()
+                                        .map(Role::getViewText)
+                                        .collect(Collectors.toSet())))
+        );
+
+        model.addAttribute("newUser", new User());
 
         return "desktop";
     }
 
-    @GetMapping("/create")
-    public String createPage(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "register";
-    }
-
     @PostMapping("/create")
-    public String createUser(@RequestParam(value = "selectedRoles", required = false) Set<Long> selectedRoles,
+    public String createUser(@RequestParam(value = "selectedRole") String selectedRole,
                              @ModelAttribute(name = "user") User user) {
-        if (selectedRoles != null) {
-            user.setRoles(selectedRoles.stream()
-                    .map(roleService::findRoleById)
-                    .collect(Collectors.toSet()));
-        } else {
-            user.setRoles(new HashSet<>());
+        user.setRoles(new HashSet<>(Set.of(roleService.findRoleByName("ROLE_USER"))));
+
+        if (selectedRole.equals("ROLE_ADMIN")) {
+            user.getRoles().add(roleService.findRoleByName("ROLE_ADMIN"));
         }
 
         if (userService.createUser(user) == null) {
             System.out.println("Failed to create a new user!");
             System.out.println(user);
-            return "redirect:/create?error";
+            return "redirect:/admin?create_error";
         }
 
-        return "redirect:/admin";
-    }
-
-    @GetMapping("/edit/{id}")
-    public String editPage(@PathVariable("id") long id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("allRoles", roleService.getAllRoles());
-        return "edit";
+        return "redirect:/admin?create_success";
     }
 
     @PutMapping("/edit")
-    public String editUser(@RequestParam(value = "selectedRoles", required = false) Set<Long> selectedRoles,
+    public String editUser(@RequestParam(value = "selectedRole") String selectedRole,
                            @ModelAttribute("user") User user) {
         try {
-            if (selectedRoles != null) {
-                user.setRoles(selectedRoles.stream()
-                        .map(roleService::findRoleById)
-                        .collect(Collectors.toSet()));
-            } else {
-                user.setRoles(new HashSet<>());
+            user.setRoles(new HashSet<>(Set.of(roleService.findRoleByName("ROLE_USER"))));
+
+            if (selectedRole.equals("ROLE_ADMIN")) {
+                user.getRoles().add(roleService.findRoleByName("ROLE_ADMIN"));
             }
 
             if (userService.updateUser(user) == null) {
                 System.out.println("The changes could not be saved to the database!");
                 System.out.println(user);
-                return String.format("redirect:/admin/edit/%d?error", user.getId());
+                return "redirect:/admin?update_error";
             }
-            return "redirect:/admin";
+            return String.format("redirect:/admin?update_success&id=%d", user.getId());
         } catch (Exception e) {
             e.printStackTrace();
-            return String.format("redirect:/admin/edit/%d?error", user.getId());
+            return "redirect:/admin?update_error";
         }
     }
 
-    @PutMapping("/edit-password")
-    public String editPassword(@RequestParam("id") long id,
-                               @RequestParam("password") String password) {
-        if (!userService.updatePassword(id, password)) {
-            System.out.println("Failed to update the password for the id: " + id);
-            return String.format("redirect:/admin/edit/%d/password_error", id);
-        }
-
-        return "redirect:/admin";
-    }
-
-    @DeleteMapping("/delete/{id}")
-    public String deleteUser(@PathVariable("id") long id) {
+    @DeleteMapping("/delete")
+    public String deleteUser(@RequestParam("id") long id) {
         if (!userService.deleteUserById(id)) {
             System.out.println("Couldn't delete user with id: " + id);
+            return "redirect:/admin?delete_error";
         }
 
-        return "redirect:/admin";
+        return "redirect:/admin?delete_success";
+    }
+
+    @ResponseBody
+    @GetMapping("/user-info/{id}")
+    public User getUserById(@PathVariable("id") long id) {
+        User user = userService.getUserById(id);
+        user.setPassword(null);
+        return user;
+    }
+
+    @ResponseBody
+    @GetMapping("/user-role/{id}")
+    public String getRoleById(@PathVariable("id") long id) {
+        if (userService.getUserById(id).getRoles()
+                                        .stream()
+                                        .anyMatch(r -> r.getName().equals("ROLE_ADMIN"))) {
+            return "ROLE_ADMIN";
+        } else {
+            return "ROLE_USER";
+        }
     }
 }

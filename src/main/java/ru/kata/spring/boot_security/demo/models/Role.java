@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.models;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -27,6 +28,7 @@ public class Role implements GrantedAuthority {
     @Column(name = "is_required")
     private boolean isRequired;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "roles", cascade = CascadeType.ALL)
     private Set<User> users = new HashSet<>();
 

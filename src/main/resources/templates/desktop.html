@@ -1,189 +1,435 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-bs-theme="auto" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title th:if="${roles.contains('ROLE_ADMIN')}">Admin Panel</title>
-    <title th:if="${!roles.contains('ROLE_ADMIN')}">User Page</title>
+    <script src="/js/color-modes.js"></script>
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/js/snippets.js"></script>
 
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/desktop.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</title>
+    <title th:if="${page.equals('PAGE_USER')}">User Page</title>
+
+<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">-->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">-->
+    <link href="/css/desktop.css" type="text/css" rel="stylesheet">
 </head>
 <body>
-
-<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-    <div class="col-md-3 col-lg-2 d-flex align-items-center">
-        <a class="navbar-brand  mr-2 font-weight-bold" th:text="${user.getEmail()}">email</a>
-        <a class="navbar-brand" th:text="${'with roles: ' + viewRoles}">roles</a>
-    </div>
-    <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
+<div class="change-theme dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
+    <button class="btn btn-bd-primary py-2 dropdown-toggle d-flex align-items-center"
+            id="bd-theme"
+            type="button"
+            aria-expanded="false"
+            data-bs-toggle="dropdown"
+            aria-label="Toggle theme (auto)">
+        <svg class="bi my-1 theme-icon-active" width="1em" height="1em"><use href="/svg/theme_icons.svg#circle-half"></use></svg>
+        <span class="visually-hidden" id="bd-theme-text">Toggle theme</span>
     </button>
-    <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-            <a class="nav-link" th:href="@{/logout}">Logout</a>
+    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="bd-theme-text">
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="/svg/theme_icons.svg#sun-fill"></use></svg>
+                Light
+                <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="/svg/theme_icons.svg#check2"></use></svg>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="/svg/theme_icons.svg#moon-stars-fill"></use></svg>
+                Dark
+                <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="/svg/theme_icons.svg#check2"></use></svg>
+            </button>
+        </li>
+        <li>
+            <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto" aria-pressed="true">
+                <svg class="bi me-2 opacity-50" width="1em" height="1em"><use href="/svg/theme_icons.svg#circle-half"></use></svg>
+                Auto
+                <svg class="bi ms-auto d-none" width="1em" height="1em"><use href="/svg/theme_icons.svg#check2"></use></svg>
+            </button>
         </li>
     </ul>
-</nav>
+</div>
+
+<header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+<!--    <ul class="navbar-nav flex-row d-md-none">-->
+<!--        <li class="nav-item text-nowrap">-->
+<!--            <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">-->
+<!--                <svg class="bi"><use xlink:href="#list"/></svg>-->
+<!--            </button>-->
+<!--        </li>-->
+<!--    </ul>-->
+
+    <a class="navbar-brand me-0 px-3 fs-6 text-white" href="#">
+        <span class="fw-bold" th:text="${user.getEmail()}"></span>
+        <span th:text="${' with roles: ' + usersViewRoles.get(user.getId())}"></span>
+    </a>
+
+    <a class="logout-label" th:href="@{/logout}">Logout</a>
+</header>
 
 <div class="container-fluid">
     <div class="row">
-        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-            <div class="sidebar-sticky pt-3">
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <span data-feather="home"></span>
-                            Dashboard <span class="sr-only">(current)</span>
-                        </a>
+        <div class="left-menu col-lg-2 col-md-2">
+            <ul class="nav flex-column">
+                <li th:if="${roles.contains('ROLE_ADMIN')}" class="nav-item">
+                    <a th:class="${'nav-link ' + (page.equals('PAGE_ADMIN') ? 'active' : '')}"
+                       th:aria-current="${page.equals('PAGE_ADMIN') ? 'page' : ''}"
+                       th:href="${!page.equals('PAGE_ADMIN')} ? @{'/admin'} : '#'">Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a th:class="${'nav-link ' + (page.equals('PAGE_USER') ? 'active' : '')}"
+                       th:aria-current="${page.equals('PAGE_USER') ? 'page' : ''}"
+                       th:href="${!page.equals('PAGE_USER')} ? @{'/user'} : '#'">User</a>
+                </li>
+            </ul>
+        </div>
+
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <h1 th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</h1>
+            <h1 th:if="${page.equals('PAGE_USER')}">User information-page</h1>
+
+            <div th:if="${page.equals('PAGE_USER')}" class="about-user">
+                <div class="frame">
+                    <div class="header">About User</div>
+
+                    <div class="content">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">E-mail</th>
+                                <th scope="col">Phone Number</th>
+                                <th scope="col">Gender</th>
+                                <th scope="col">Date Of Birth</th>
+                                <th scope="col">Role</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td th:text="${user.getId()}"></td>
+                                <td th:text="${user.getName()}"></td>
+                                <td th:text="${user.getEmail()}"></td>
+                                <td th:text="${user.getPhoneNumber()}"></td>
+                                <td th:text="${user.getGender().getText()}"></td>
+                                <td th:text="${#temporals.format(user.getDateOfBirth(), 'MM-dd-yyyy')}"></td>
+                                <td th:text="${usersViewRoles.get(user.getId())}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${page.equals('PAGE_ADMIN')}" class="admin-panel">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button th:class="'nav-link ' + (${param.create_error} ? '' : 'active')"
+                                data-bs-toggle="tab"
+                                data-bs-target="#users-table-tab-pane"
+                                type="button" role="tab"
+                                aria-controls="users-table-tab-pane">Users Table</button>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <span data-feather="file"></span>
-                            Orders
-                        </a>
+                    <li class="nav-item" role="presentation">
+                        <button th:class="'nav-link ' + (${param.create_error} ? 'active' : '')"
+                                data-bs-toggle="tab"
+                                data-bs-target="#new-user-tab-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="new-user-tab-pane">New User</button>
                     </li>
                 </ul>
-            </div>
-        </nav>
 
-        <main th:if="${roles.contains('ROLE_ADMIN')}" role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1>Admin Panel</h1>
-            </div>
-            <h2>Section title</h2>
-            <div class="table-responsive">
-                <table class="table table-striped table-sm">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                        <th>Header</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>1,001</td>
-                        <td>random</td>
-                        <td>data</td>
-                        <td>placeholder</td>
-                        <td>text</td>
-                    </tr>
-                    <tr>
-                        <td>1,002</td>
-                        <td>placeholder</td>
-                        <td>irrelevant</td>
-                        <td>visual</td>
-                        <td>layout</td>
-                    </tr>
-                    <tr>
-                        <td>1,003</td>
-                        <td>data</td>
-                        <td>rich</td>
-                        <td>dashboard</td>
-                        <td>tabular</td>
-                    </tr>
-                    <tr>
-                        <td>1,003</td>
-                        <td>information</td>
-                        <td>placeholder</td>
-                        <td>illustrative</td>
-                        <td>data</td>
-                    </tr>
-                    <tr>
-                        <td>1,004</td>
-                        <td>text</td>
-                        <td>random</td>
-                        <td>layout</td>
-                        <td>dashboard</td>
-                    </tr>
-                    <tr>
-                        <td>1,005</td>
-                        <td>dashboard</td>
-                        <td>irrelevant</td>
-                        <td>text</td>
-                        <td>placeholder</td>
-                    </tr>
-                    <tr>
-                        <td>1,006</td>
-                        <td>dashboard</td>
-                        <td>illustrative</td>
-                        <td>rich</td>
-                        <td>data</td>
-                    </tr>
-                    <tr>
-                        <td>1,007</td>
-                        <td>placeholder</td>
-                        <td>tabular</td>
-                        <td>information</td>
-                        <td>irrelevant</td>
-                    </tr>
-                    <tr>
-                        <td>1,008</td>
-                        <td>random</td>
-                        <td>data</td>
-                        <td>placeholder</td>
-                        <td>text</td>
-                    </tr>
-                    <tr>
-                        <td>1,009</td>
-                        <td>placeholder</td>
-                        <td>irrelevant</td>
-                        <td>visual</td>
-                        <td>layout</td>
-                    </tr>
-                    <tr>
-                        <td>1,010</td>
-                        <td>data</td>
-                        <td>rich</td>
-                        <td>dashboard</td>
-                        <td>tabular</td>
-                    </tr>
-                    <tr>
-                        <td>1,011</td>
-                        <td>information</td>
-                        <td>placeholder</td>
-                        <td>illustrative</td>
-                        <td>data</td>
-                    </tr>
-                    <tr>
-                        <td>1,012</td>
-                        <td>text</td>
-                        <td>placeholder</td>
-                        <td>layout</td>
-                        <td>dashboard</td>
-                    </tr>
-                    <tr>
-                        <td>1,013</td>
-                        <td>dashboard</td>
-                        <td>irrelevant</td>
-                        <td>text</td>
-                        <td>visual</td>
-                    </tr>
-                    <tr>
-                        <td>1,014</td>
-                        <td>dashboard</td>
-                        <td>illustrative</td>
-                        <td>rich</td>
-                        <td>data</td>
-                    </tr>
-                    <tr>
-                        <td>1,015</td>
-                        <td>random</td>
-                        <td>tabular</td>
-                        <td>information</td>
-                        <td>text</td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="tab-content" id="myTabContent">
+                    <div    th:class="'tab-pane fade ' + (${param.create_error} ? '' : 'show active')"
+                            id="users-table-tab-pane"
+                            role="tabpanel"
+                            aria-labelledby="users-table-tab"
+                            tabindex="0">
+
+                        <div class="frame">
+                            <div class="header">All Users</div>
+
+                            <div class="content">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">ID</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">E-mail</th>
+                                        <th scope="col">Phone Number</th>
+                                        <th scope="col">Gender</th>
+                                        <th scope="col">Date Of Birth</th>
+                                        <th scope="col">Role</th>
+                                        <th scope="col">Edit</th>
+                                        <th scope="col">Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="u : ${users}">
+                                        <td th:text="${u.getId()}"></td>
+                                        <td th:text="${u.getName()}"></td>
+                                        <td th:text="${u.getEmail()}"></td>
+                                        <td th:text="${u.getPhoneNumber()}"></td>
+                                        <td th:text="${u.getGender().getText()}"></td>
+                                        <td th:text="${#temporals.format(u.getDateOfBirth(), 'MM-dd-yyyy')}"></td>
+                                        <td th:text="${usersViewRoles.get(u.getId())}"></td>
+                                        <td>
+                                            <button class="btn-edit btn btn-info p-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#edit-user-modal"
+                                                    th:data-bs-user-id="${u.getId()}">Edit</button>
+                                        </td>
+                                        <td>
+                                            <button class="btn-delete btn btn-danger p-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#delete-user-modal"
+                                                    th:data-bs-user-id="${u.getId()}">Delete</button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div    th:class="'tab-pane fade ' + (${param.create_error} ? 'show active' : '')"
+                            id="new-user-tab-pane"
+                            role="tabpanel"
+                            aria-labelledby="new-user-tab"
+                            tabindex="1">
+
+                        <div class="frame">
+                            <div class="header">Add New User</div>
+
+                            <div class="form-user content">
+                                <div th:if="${param.create_error}" class="alert alert-danger mb-4" role="alert">
+                                    Failed to create a new user!
+                                </div>
+
+                                <div class="d-flex justify-content-center">
+                                    <div class="form-user-column col-lg-3">
+                                        <form method="post" th:action="@{/admin/create}" th:object="${newUser}">
+                                            <div class="flex-column d-flex align-items-center">
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="name">Name</label>
+                                                    <input class="form-control" type="text" id="name" th:field="*{name}" />
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="email">E-mail</label>
+                                                    <input class="form-control" type="text" id="email" th:field="*{email}" />
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="phone">Phone Number</label>
+                                                    <input class="form-control" type="text" id="phone" th:field="*{phoneNumber}" />
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="gender">Gender </label>
+                                                    <select class="form-select" id="gender" th:field="*{gender}">
+                                                        <option value="NOT_DEFINED" selected>Not Defined</option>
+                                                        <option value="MALE"                >Male</option>
+                                                        <option value="FEMALE"              >Female</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="date-of-birth">Date of Birth</label>
+                                                    <input class="form-control"
+                                                           type="date"
+                                                           id="date-of-birth"
+                                                           min="1900-01-01"
+                                                           max="2012-12-31"
+                                                           th:field="*{dateOfBirth}" />
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="password">Password</label>
+                                                    <input class="form-control" type="password" id="password" th:field="*{password}" />
+                                                </div>
+
+                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                    <label class="form-label" for="roles">Roles</label>
+                                                    <select class="form-select" name="selectedRole" id="roles">
+                                                        <option value="ROLE_USER" selected>User </option>
+                                                        <option value="ROLE_ADMIN"        >Admin</option>
+                                                    </select>
+                                                </div>
+
+                                                <input class="btn-add btn btn-success py-2 px-3"
+                                                       type="submit"
+                                                       value="Add New User" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 </div>
 
+<div class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" th:action="@{/admin/edit}">
+                <input type="hidden" name="_method" value="put" />
+                <input type="hidden" name="id" id="hidden-edit-user-id" />
 
-<script src="../js/bootstrap.min.js"></script>
+                <div class="modal-header">
+                    <h1 id="edit-user-title" class="modal-title fs-5">Edit User</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-user d-flex justify-content-center">
+                        <div class="col-lg-5 flex-column">
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-id">ID</label>
+                                <input class="form-control" type="text" id="edit-user-id" disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-name">Name</label>
+                                <input class="form-control" type="text" id="edit-name" name="name" />
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-email">E-mail</label>
+                                <input class="form-control" type="text" id="edit-email" name="email" />
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-phone-number">Phone Number</label>
+                                <input class="form-control" type="text" id="edit-phone-number" name="phoneNumber"/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-gender">Gender </label>
+                                <select class="form-select" id="edit-gender" name="gender">
+                                    <option value="NOT_DEFINED" selected>Not Defined</option>
+                                    <option value="MALE"                >Male</option>
+                                    <option value="FEMALE"              >Female</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-date-of-birth">Date of Birth</label>
+                                <input class="form-control"
+                                       type="date"
+                                       id="edit-date-of-birth"
+                                       min="1900-01-01"
+                                       max="2012-12-31"
+                                       name="dateOfBirth" />
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-password">Password</label>
+                                <input class="form-control" type="password" id="edit-password" name="password" />
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-role">Roles</label>
+                                <select class="form-select" name="selectedRole" id="edit-role">
+                                    <option value="ROLE_USER" selected>User </option>
+                                    <option value="ROLE_ADMIN"        >Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary" value="Edit" />
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" th:action="@{/admin/delete}">
+                <input type="hidden" name="_method" value="delete" />
+                <input type="hidden" name="id" id="hidden-delete-user-id" />
+
+                <div class="modal-header">
+                    <h1 id="delete-user-title" class="modal-title fs-5">Delete User</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="form-user d-flex justify-content-center">
+                        <div class="col-lg-5 flex-column">
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-id">ID</label>
+                                <input class="form-control" type="text" id="delete-user-id" disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-name">Name</label>
+                                <input class="form-control" type="text" id="delete-user-name"  disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-email">E-mail</label>
+                                <input class="form-control" type="text" id="delete-user-email" disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-phone-number">Phone Number</label>
+                                <input class="form-control" type="text" id="delete-user-phone-number" disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-gender">Gender </label>
+                                <select class="form-select" id="delete-user-gender" disabled>
+                                    <option value="NOT_DEFINED" selected>Not Defined</option>
+                                    <option value="MALE"                >Male</option>
+                                    <option value="FEMALE"              >Female</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-date-of-birth">Date of Birth</label>
+                                <input class="form-control"
+                                       type="date"
+                                       id="delete-user-date-of-birth"
+                                       min="1900-01-01"
+                                       max="2012-12-31" disabled/>
+                            </div>
+
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-role">Role</label>
+                                <select class="form-select" id="delete-user-role" disabled>
+                                    <option value="ROLE_USER" selected>User </option>
+                                    <option value="ROLE_ADMIN"        >Admin</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-danger" value="Delete" />
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

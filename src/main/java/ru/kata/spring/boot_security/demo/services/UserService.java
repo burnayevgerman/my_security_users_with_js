@@ -11,6 +11,5 @@ public interface UserService {
     User getUserByEmail(String email);
     User createUser(User user);
     User updateUser(User user);
-    boolean updatePassword(long id, String password);
     boolean deleteUserById(long id);
 }

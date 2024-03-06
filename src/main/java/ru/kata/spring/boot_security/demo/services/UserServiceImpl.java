@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findUserByEmail(username);
+        User user = getUserByEmail(username);
 
         if (user == null) {
             throw new UsernameNotFoundException(
@@ -58,11 +58,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User getUserByEmail(String email) {
-        return userRepository.findUserByEmail(email);
+        return userRepository.findUserByEmail(email).orElse(null);
     }
 
     @Override
     public User createUser(User user) {
+        if ((getUserByEmail(user.getEmail()) != null) || user.getPassword().isEmpty()) {
+            return null;
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         roleService.getAllRoles().stream()
                 .filter(Role::isRequired)
@@ -72,18 +76,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User updateUser(User user) {
-        user.setPassword(userRepository.getById(user.getId()).getPassword());
+        if (user.getPassword().isEmpty()) {
+            user.setPassword(userRepository.getById(user.getId()).getPassword());
+        } else {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         roleService.getAllRoles().stream()
                 .filter(Role::isRequired)
                 .forEach(r -> user.getRoles().add(r));
         return userRepository.save(user);
-    }
-
-    @Override
-    public boolean updatePassword(long id, String password) {
-        User user = userRepository.getById(id);
-        user.setPassword(passwordEncoder.encode(password));
-        return Objects.nonNull(userRepository.save(user));
     }
 
     @Override

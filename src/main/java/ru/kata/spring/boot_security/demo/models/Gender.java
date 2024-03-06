@@ -1,6 +1,8 @@
 package ru.kata.spring.boot_security.demo.models;
 
-public enum Gender {
+import java.io.Serializable;
+
+public enum Gender implements Serializable {
     MALE("Male"),
     FEMALE("Female"),
     NOT_DEFINED("Not Defined");

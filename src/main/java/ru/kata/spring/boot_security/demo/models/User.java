@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 @Getter
@@ -33,7 +34,7 @@ public class User implements UserDetails {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "date_of_birth")
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
