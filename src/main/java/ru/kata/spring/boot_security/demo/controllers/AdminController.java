@@ -62,13 +62,15 @@ public class AdminController {
             user.getRoles().add(roleService.findRoleByName("ROLE_ADMIN"));
         }
 
-        if (userService.createUser(user) == null) {
+        user = userService.createUser(user);
+
+        if (user == null) {
             System.out.println("Failed to create a new user!");
             System.out.println(user);
             return "redirect:/admin?create_error";
         }
 
-        return "redirect:/admin?create_success";
+        return String.format("redirect:/admin?create_success&id=%d", user.getId());
     }
 
     @PutMapping("/edit")
@@ -84,12 +86,12 @@ public class AdminController {
             if (userService.updateUser(user) == null) {
                 System.out.println("The changes could not be saved to the database!");
                 System.out.println(user);
-                return "redirect:/admin?update_error";
+                return String.format("redirect:/admin?update_error&id=%d", user.getId());
             }
             return String.format("redirect:/admin?update_success&id=%d", user.getId());
         } catch (Exception e) {
             e.printStackTrace();
-            return "redirect:/admin?update_error";
+            return String.format("redirect:/admin?update_error&id=%d", user.getId());
         }
     }
 
@@ -97,10 +99,10 @@ public class AdminController {
     public String deleteUser(@RequestParam("id") long id) {
         if (!userService.deleteUserById(id)) {
             System.out.println("Couldn't delete user with id: " + id);
-            return "redirect:/admin?delete_error";
+            return String.format("redirect:/admin?delete_error&id=%d", id);
         }
 
-        return "redirect:/admin?delete_success";
+        return String.format("redirect:/admin?delete_success&id=%d", id);
     }
 
     @ResponseBody

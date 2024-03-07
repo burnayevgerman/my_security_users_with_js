@@ -10,11 +10,8 @@
     <title th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</title>
     <title th:if="${page.equals('PAGE_USER')}">User Page</title>
 
-<!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@docsearch/css@3">-->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
-
-<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">-->
-    <link href="/css/desktop.css" type="text/css" rel="stylesheet">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
 </head>
 <body>
 <div class="change-theme dropdown position-fixed bottom-0 end-0 mb-3 me-3 bd-mode-toggle">
@@ -89,6 +86,19 @@
         <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
             <h1 th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</h1>
             <h1 th:if="${page.equals('PAGE_USER')}">User information-page</h1>
+
+            <div th:if="${param.create_success} and ${roles.contains('ROLE_ADMIN')}"
+                 class="alert alert-success mb-3"
+                 role="alert"
+                 th:text="${'Success created new user with id: ' + param.id}"></div>
+            <div th:if="${param.update_success} and ${roles.contains('ROLE_ADMIN')}"
+                 class="alert alert-success mb-3"
+                 role="alert"
+                 th:text="${'Success updated the user with id: ' + param.id}"></div>
+            <div th:if="${param.delete_success} and ${roles.contains('ROLE_ADMIN')}"
+                 class="alert alert-success mb-3"
+                 role="alert"
+                 th:text="${'Success deleted the user with id: ' + param.id}"></div>
 
             <div th:if="${page.equals('PAGE_USER')}" class="about-user">
                 <div class="frame">
@@ -205,7 +215,7 @@
                             <div class="header">Add New User</div>
 
                             <div class="form-user content">
-                                <div th:if="${param.create_error}" class="alert alert-danger mb-4" role="alert">
+                                <div th:if="${param.create_error} and ${roles.contains('ROLE_ADMIN')}" class="alert alert-danger mb-4" role="alert">
                                     Failed to create a new user!
                                 </div>
 
@@ -276,7 +286,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+<div    th:if="${roles.contains('ROLE_ADMIN')}"
+        class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" th:action="@{/admin/edit}">
@@ -289,58 +301,64 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-user d-flex justify-content-center">
-                        <div class="col-lg-5 flex-column">
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-user-id">ID</label>
-                                <input class="form-control" type="text" id="edit-user-id" disabled/>
-                            </div>
+                    <div class="form-user flex-column">
+                        <div th:if="${param.update_error}" class="alert alert-danger mb-3" role="alert">
+                            Failed update the user!
+                        </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-name">Name</label>
-                                <input class="form-control" type="text" id="edit-name" name="name" />
-                            </div>
+                        <div class="d-flex justify-content-center">
+                            <div class="col-lg-5">
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-user-id">ID</label>
+                                    <input class="form-control" type="text" id="edit-user-id" disabled/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-email">E-mail</label>
-                                <input class="form-control" type="text" id="edit-email" name="email" />
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-name">Name</label>
+                                    <input class="form-control" type="text" id="edit-name" name="name" />
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-phone-number">Phone Number</label>
-                                <input class="form-control" type="text" id="edit-phone-number" name="phoneNumber"/>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-email">E-mail</label>
+                                    <input class="form-control" type="text" id="edit-email" name="email" />
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-gender">Gender </label>
-                                <select class="form-select" id="edit-gender" name="gender">
-                                    <option value="NOT_DEFINED" selected>Not Defined</option>
-                                    <option value="MALE"                >Male</option>
-                                    <option value="FEMALE"              >Female</option>
-                                </select>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-phone-number">Phone Number</label>
+                                    <input class="form-control" type="text" id="edit-phone-number" name="phoneNumber"/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-date-of-birth">Date of Birth</label>
-                                <input class="form-control"
-                                       type="date"
-                                       id="edit-date-of-birth"
-                                       min="1900-01-01"
-                                       max="2012-12-31"
-                                       name="dateOfBirth" />
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-gender">Gender </label>
+                                    <select class="form-select" id="edit-gender" name="gender">
+                                        <option value="NOT_DEFINED" selected>Not Defined</option>
+                                        <option value="MALE"                >Male</option>
+                                        <option value="FEMALE"              >Female</option>
+                                    </select>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-password">Password</label>
-                                <input class="form-control" type="password" id="edit-password" name="password" />
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-date-of-birth">Date of Birth</label>
+                                    <input class="form-control"
+                                           type="date"
+                                           id="edit-date-of-birth"
+                                           min="1900-01-01"
+                                           max="2012-12-31"
+                                           name="dateOfBirth" />
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="edit-role">Roles</label>
-                                <select class="form-select" name="selectedRole" id="edit-role">
-                                    <option value="ROLE_USER" selected>User </option>
-                                    <option value="ROLE_ADMIN"        >Admin</option>
-                                </select>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-password">Password</label>
+                                    <input class="form-control" type="password" id="edit-password" name="password" />
+                                </div>
+
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="edit-role">Roles</label>
+                                    <select class="form-select" name="selectedRole" id="edit-role">
+                                        <option value="ROLE_USER" selected>User </option>
+                                        <option value="ROLE_ADMIN"        >Admin</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -356,7 +374,9 @@
     </div>
 </div>
 
-<div class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
+<div    th:if="${roles.contains('ROLE_ADMIN')}"
+        class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
+
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" th:action="@{/admin/delete}">
@@ -369,52 +389,58 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-user d-flex justify-content-center">
-                        <div class="col-lg-5 flex-column">
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-id">ID</label>
-                                <input class="form-control" type="text" id="delete-user-id" disabled/>
-                            </div>
+                    <div class="form-user flex-column">
+                        <div th:if="${param.delete_error}" class="alert alert-danger mb-3" role="alert">
+                            Failed delete the user!
+                        </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-name">Name</label>
-                                <input class="form-control" type="text" id="delete-user-name"  disabled/>
-                            </div>
+                        <div class="d-flex justify-content-center">
+                            <div class="col-lg-5">
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-id">ID</label>
+                                    <input class="form-control" type="text" id="delete-user-id" disabled/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-email">E-mail</label>
-                                <input class="form-control" type="text" id="delete-user-email" disabled/>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-name">Name</label>
+                                    <input class="form-control" type="text" id="delete-user-name"  disabled/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-phone-number">Phone Number</label>
-                                <input class="form-control" type="text" id="delete-user-phone-number" disabled/>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-email">E-mail</label>
+                                    <input class="form-control" type="text" id="delete-user-email" disabled/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-gender">Gender </label>
-                                <select class="form-select" id="delete-user-gender" disabled>
-                                    <option value="NOT_DEFINED" selected>Not Defined</option>
-                                    <option value="MALE"                >Male</option>
-                                    <option value="FEMALE"              >Female</option>
-                                </select>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-phone-number">Phone Number</label>
+                                    <input class="form-control" type="text" id="delete-user-phone-number" disabled/>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-date-of-birth">Date of Birth</label>
-                                <input class="form-control"
-                                       type="date"
-                                       id="delete-user-date-of-birth"
-                                       min="1900-01-01"
-                                       max="2012-12-31" disabled/>
-                            </div>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-gender">Gender </label>
+                                    <select class="form-select" id="delete-user-gender" disabled>
+                                        <option value="NOT_DEFINED" selected>Not Defined</option>
+                                        <option value="MALE"                >Male</option>
+                                        <option value="FEMALE"              >Female</option>
+                                    </select>
+                                </div>
 
-                            <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                <label class="form-label" for="delete-user-role">Role</label>
-                                <select class="form-select" id="delete-user-role" disabled>
-                                    <option value="ROLE_USER" selected>User </option>
-                                    <option value="ROLE_ADMIN"        >Admin</option>
-                                </select>
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-date-of-birth">Date of Birth</label>
+                                    <input class="form-control"
+                                           type="date"
+                                           id="delete-user-date-of-birth"
+                                           min="1900-01-01"
+                                           max="2012-12-31" disabled/>
+                                </div>
+
+                                <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                    <label class="form-label" for="delete-user-role">Role</label>
+                                    <select class="form-select" id="delete-user-role" disabled>
+                                        <option value="ROLE_USER" selected>User </option>
+                                        <option value="ROLE_ADMIN"        >Admin</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
