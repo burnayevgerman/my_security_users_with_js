@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en" data-bs-theme="auto" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" data-bs-theme="auto"
+      xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org">
 <head>
     <script src="/js/color-modes.js"></script>
     <script src="/js/jquery-3.7.1.min.js"></script>
-    <script src="/js/snippets.js"></script>
+    <script src="/js/desktop.js"></script>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</title>
-    <title th:if="${page.equals('PAGE_USER')}">User Page</title>
+    <title class="fill-title">? Panel</title>
 
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link href="/css/main.css" type="text/css" rel="stylesheet">
@@ -59,8 +59,8 @@
 <!--    </ul>-->
 
     <a class="navbar-brand me-0 px-3 fs-6 text-white" href="#">
-        <span class="fw-bold" th:text="${user.getEmail()}"></span>
-        <span th:text="${' with roles: ' + usersViewRoles.get(user.getId())}"></span>
+        <span class="fill-header-email fw-bold">***@**.**</span>
+        <span class="fill-header-roles">with roles: ?, ?</span>
     </a>
 
     <a class="logout-label" th:href="@{/logout}">Logout</a>
@@ -70,37 +70,33 @@
     <div class="row">
         <div class="left-menu col-lg-2 col-md-2">
             <ul class="nav flex-column">
-                <li th:if="${roles.contains('ROLE_ADMIN')}" class="nav-item">
-                    <a th:class="${'nav-link ' + (page.equals('PAGE_ADMIN') ? 'active' : '')}"
-                       th:aria-current="${page.equals('PAGE_ADMIN') ? 'page' : ''}"
-                       th:href="${!page.equals('PAGE_ADMIN')} ? @{'/admin'} : '#'">Admin</a>
+                <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
+                    <a class="nav-link active"
+                       aria-current="page"
+                       th:href="@{/admin}">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a th:class="${'nav-link ' + (page.equals('PAGE_USER') ? 'active' : '')}"
-                       th:aria-current="${page.equals('PAGE_USER') ? 'page' : ''}"
-                       th:href="${!page.equals('PAGE_USER')} ? @{'/user'} : '#'">User</a>
+                    <a class="nav-link"
+                       aria-current=""
+                       th:href="@{/user}">User</a>
                 </li>
             </ul>
         </div>
 
         <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
-            <h1 th:if="${page.equals('PAGE_ADMIN')}">Admin Panel</h1>
-            <h1 th:if="${page.equals('PAGE_USER')}">User information-page</h1>
+            <h1 class="fill-title">? Panel</h1>
 
-            <div th:if="${param.create_success} and ${roles.contains('ROLE_ADMIN')}"
+            <div id="alert-create-success"
                  class="alert alert-success mb-3"
-                 role="alert"
-                 th:text="${'Success created new user with id: ' + param.id}"></div>
-            <div th:if="${param.update_success} and ${roles.contains('ROLE_ADMIN')}"
+                 role="alert">Success created new user with id: </div>
+            <div id="alert-update-success"
                  class="alert alert-success mb-3"
-                 role="alert"
-                 th:text="${'Success updated the user with id: ' + param.id}"></div>
-            <div th:if="${param.delete_success} and ${roles.contains('ROLE_ADMIN')}"
+                 role="alert">Success updated a user with id: </div>
+            <div id="alert-delete-success"
                  class="alert alert-success mb-3"
-                 role="alert"
-                 th:text="${'Success deleted the user with id: ' + param.id}"></div>
+                 role="alert">Success deleted a user with id: </div>
 
-            <div th:if="${page.equals('PAGE_USER')}" class="about-user">
+            <div class="about-user">
                 <div class="frame">
                     <div class="header">About User</div>
 
@@ -119,13 +115,13 @@
                             </thead>
                             <tbody>
                             <tr>
-                                <td th:text="${user.getId()}"></td>
-                                <td th:text="${user.getName()}"></td>
-                                <td th:text="${user.getEmail()}"></td>
-                                <td th:text="${user.getPhoneNumber()}"></td>
-                                <td th:text="${user.getGender().getText()}"></td>
-                                <td th:text="${#temporals.format(user.getDateOfBirth(), 'MM-dd-yyyy')}"></td>
-                                <td th:text="${usersViewRoles.get(user.getId())}"></td>
+                                <td class="fill-user-id">Id ?</td>
+                                <td class="fill-user-name">Name ?</td>
+                                <td class="fill-user-email">E-mail ?</td>
+                                <td class="fill-user-phone">Phone Number ?</td>
+                                <td class="fill-user-gender">Gender ?</td>
+                                <td class="fill-user-bdate">Date Of Birth ?</td>
+                                <td class="fill-user-roles">Roles ?</td>
                             </tr>
                             </tbody>
                         </table>
@@ -133,17 +129,17 @@
                 </div>
             </div>
 
-            <div th:if="${page.equals('PAGE_ADMIN')}" class="admin-panel">
+            <div sec:authorize="hasRole('ROLE_ADMIN')" class="admin-panel">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button th:class="'nav-link ' + (${param.create_error} ? '' : 'active')"
+                        <button class="nav-link active"
                                 data-bs-toggle="tab"
                                 data-bs-target="#users-table-tab-pane"
                                 type="button" role="tab"
                                 aria-controls="users-table-tab-pane">Users Table</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button th:class="'nav-link ' + (${param.create_error} ? 'active' : '')"
+                        <button class="nav-link"
                                 data-bs-toggle="tab"
                                 data-bs-target="#new-user-tab-pane"
                                 type="button"
@@ -153,7 +149,7 @@
                 </ul>
 
                 <div class="tab-content" id="myTabContent">
-                    <div    th:class="'tab-pane fade ' + (${param.create_error} ? '' : 'show active')"
+                    <div    class="tab-pane fade show active"
                             id="users-table-tab-pane"
                             role="tabpanel"
                             aria-labelledby="users-table-tab"
@@ -163,7 +159,7 @@
                             <div class="header">All Users</div>
 
                             <div class="content">
-                                <table class="table table-striped">
+                                <table id="users-list" class="table table-striped">
                                     <thead>
                                     <tr>
                                         <th scope="col">ID</th>
@@ -172,75 +168,53 @@
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Gender</th>
                                         <th scope="col">Date Of Birth</th>
-                                        <th scope="col">Role</th>
+                                        <th scope="col">Roles</th>
                                         <th scope="col">Edit</th>
                                         <th scope="col">Delete</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    <tr th:each="u : ${users}">
-                                        <td th:text="${u.getId()}"></td>
-                                        <td th:text="${u.getName()}"></td>
-                                        <td th:text="${u.getEmail()}"></td>
-                                        <td th:text="${u.getPhoneNumber()}"></td>
-                                        <td th:text="${u.getGender().getText()}"></td>
-                                        <td th:text="${#temporals.format(u.getDateOfBirth(), 'MM-dd-yyyy')}"></td>
-                                        <td th:text="${usersViewRoles.get(u.getId())}"></td>
-                                        <td>
-                                            <button class="btn-edit btn btn-info p-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#edit-user-modal"
-                                                    th:data-bs-user-id="${u.getId()}">Edit</button>
-                                        </td>
-                                        <td>
-                                            <button class="btn-delete btn btn-danger p-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#delete-user-modal"
-                                                    th:data-bs-user-id="${u.getId()}">Delete</button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
+                                    <tbody></tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
 
-                    <div    th:class="'tab-pane fade ' + (${param.create_error} ? 'show active' : '')"
+                    <div    class="tab-pane fade"
                             id="new-user-tab-pane"
                             role="tabpanel"
                             aria-labelledby="new-user-tab"
-                            tabindex="1">
+                            tabindex="0">
 
                         <div class="frame">
                             <div class="header">Add New User</div>
 
                             <div class="form-user content">
-                                <div th:if="${param.create_error} and ${roles.contains('ROLE_ADMIN')}" class="alert alert-danger mb-4" role="alert">
+                                <div id="alert-create-failed" class="alert alert-danger mb-4" role="alert">
                                     Failed to create a new user!
                                 </div>
 
                                 <div class="d-flex justify-content-center">
                                     <div class="form-user-column col-lg-3">
-                                        <form method="post" th:action="@{/admin/create}" th:object="${newUser}">
+                                        <form id="form-create-user">
                                             <div class="flex-column d-flex align-items-center">
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="name">Name</label>
-                                                    <input class="form-control" type="text" id="name" th:field="*{name}" />
+                                                    <label class="form-label" for="create-user-name">Name</label>
+                                                    <input class="form-control" type="text" id="create-user-name" />
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="email">E-mail</label>
-                                                    <input class="form-control" type="text" id="email" th:field="*{email}" />
+                                                    <label class="form-label" for="create-user-email">E-mail</label>
+                                                    <input class="form-control" type="text" id="create-user-email" />
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="phone">Phone Number</label>
-                                                    <input class="form-control" type="text" id="phone" th:field="*{phoneNumber}" />
+                                                    <label class="form-label" for="create-user-phone">Phone Number</label>
+                                                    <input class="form-control" type="text" id="create-user-phone" />
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="gender">Gender </label>
-                                                    <select class="form-select" id="gender" th:field="*{gender}">
+                                                    <label class="form-label" for="create-user-gender">Gender </label>
+                                                    <select class="form-select" id="create-user-gender">
                                                         <option value="NOT_DEFINED" selected>Not Defined</option>
                                                         <option value="MALE"                >Male</option>
                                                         <option value="FEMALE"              >Female</option>
@@ -248,18 +222,17 @@
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="date-of-birth">Date of Birth</label>
+                                                    <label class="form-label" for="create-user-bdate">Date of Birth</label>
                                                     <input class="form-control"
                                                            type="date"
-                                                           id="date-of-birth"
+                                                           id="create-user-bdate"
                                                            min="1900-01-01"
-                                                           max="2012-12-31"
-                                                           th:field="*{dateOfBirth}" />
+                                                           max="2012-12-31" />
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="password">Password</label>
-                                                    <input class="form-control" type="password" id="password" th:field="*{password}" />
+                                                    <label class="form-label" for="create-user-password">Password</label>
+                                                    <input class="form-control" type="password" id="create-user-password" />
                                                 </div>
 
                                                 <div class="mb-4 flex-column d-flex align-items-center w-100">
@@ -270,7 +243,8 @@
                                                     </select>
                                                 </div>
 
-                                                <input class="btn-add btn btn-success py-2 px-3"
+                                                <input id="btn-create-user"
+                                                       class="btn-add btn btn-success py-2 px-3"
                                                        type="submit"
                                                        value="Add New User" />
                                             </div>
@@ -286,172 +260,160 @@
     </div>
 </div>
 
-<div    th:if="${roles.contains('ROLE_ADMIN')}"
+<div    sec:authorize="hasRole('ROLE_ADMIN')"
         class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
 
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="post" th:action="@{/admin/edit}">
-                <input type="hidden" name="_method" value="put" />
-                <input type="hidden" name="id" id="hidden-edit-user-id" />
+            <div class="modal-header">
+                <h1 id="edit-user-title" class="modal-title fs-5">Edit User</h1>
+                <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <div class="modal-header">
-                    <h1 id="edit-user-title" class="modal-title fs-5">Edit User</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+            <div class="modal-body">
+                <div class="form-user flex-column">
+                    <div id="alert-update-error" class="alert alert-danger mb-3" role="alert">
+                        Failed update the user!
+                    </div>
 
-                <div class="modal-body">
-                    <div class="form-user flex-column">
-                        <div th:if="${param.update_error}" class="alert alert-danger mb-3" role="alert">
-                            Failed update the user!
-                        </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="col-lg-5">
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-id">ID</label>
+                                <input class="form-control" type="text" id="edit-user-id" disabled/>
+                            </div>
 
-                        <div class="d-flex justify-content-center">
-                            <div class="col-lg-5">
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-user-id">ID</label>
-                                    <input class="form-control" type="text" id="edit-user-id" disabled/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-name">Name</label>
+                                <input class="form-control" type="text" id="edit-user-name" />
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-name">Name</label>
-                                    <input class="form-control" type="text" id="edit-name" name="name" />
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-email">E-mail</label>
+                                <input class="form-control" type="text" id="edit-user-email" />
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-email">E-mail</label>
-                                    <input class="form-control" type="text" id="edit-email" name="email" />
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-phone">Phone Number</label>
+                                <input class="form-control" type="text" id="edit-user-phone"/>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-phone-number">Phone Number</label>
-                                    <input class="form-control" type="text" id="edit-phone-number" name="phoneNumber"/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-gender">Gender </label>
+                                <select class="form-select" id="edit-user-gender">
+                                    <option value="NOT_DEFINED" selected>Not Defined</option>
+                                    <option value="MALE"                >Male</option>
+                                    <option value="FEMALE"              >Female</option>
+                                </select>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-gender">Gender </label>
-                                    <select class="form-select" id="edit-gender" name="gender">
-                                        <option value="NOT_DEFINED" selected>Not Defined</option>
-                                        <option value="MALE"                >Male</option>
-                                        <option value="FEMALE"              >Female</option>
-                                    </select>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-bdate">Date of Birth</label>
+                                <input class="form-control"
+                                       type="date"
+                                       id="edit-user-bdate"
+                                       min="1900-01-01"
+                                       max="2012-12-31" />
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-date-of-birth">Date of Birth</label>
-                                    <input class="form-control"
-                                           type="date"
-                                           id="edit-date-of-birth"
-                                           min="1900-01-01"
-                                           max="2012-12-31"
-                                           name="dateOfBirth" />
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-password">Password</label>
+                                <input class="form-control" type="password" id="edit-user-password" />
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-password">Password</label>
-                                    <input class="form-control" type="password" id="edit-password" name="password" />
-                                </div>
-
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="edit-role">Roles</label>
-                                    <select class="form-select" name="selectedRole" id="edit-role">
-                                        <option value="ROLE_USER" selected>User </option>
-                                        <option value="ROLE_ADMIN"        >Admin</option>
-                                    </select>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="edit-user-role">Roles</label>
+                                <select class="form-select" id="edit-user-role">
+                                    <option value="ROLE_USER" selected>User </option>
+                                    <option value="ROLE_ADMIN"        >Admin</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-primary" value="Edit" />
-                </div>
-            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal">Close</button>
+                <input id="btn-edit-user" type="submit" class="btn btn-primary" value="Edit" />
+            </div>
 
         </div>
     </div>
 </div>
 
-<div    th:if="${roles.contains('ROLE_ADMIN')}"
+<div    sec:authorize="hasRole('ROLE_ADMIN')"
         class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
 
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form method="post" th:action="@{/admin/delete}">
-                <input type="hidden" name="_method" value="delete" />
-                <input type="hidden" name="id" id="hidden-delete-user-id" />
+            <div class="modal-header">
+                <h1 id="delete-user-title" class="modal-title fs-5">Delete User</h1>
+                <button type="button" class="btn-close close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
 
-                <div class="modal-header">
-                    <h1 id="delete-user-title" class="modal-title fs-5">Delete User</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+            <div class="modal-body">
+                <div class="form-user flex-column">
+                    <div id="alert-delete-error" class="alert alert-danger mb-3" role="alert">
+                        Failed delete the user!
+                    </div>
 
-                <div class="modal-body">
-                    <div class="form-user flex-column">
-                        <div th:if="${param.delete_error}" class="alert alert-danger mb-3" role="alert">
-                            Failed delete the user!
-                        </div>
+                    <div class="d-flex justify-content-center">
+                        <div class="col-lg-5">
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-id">ID</label>
+                                <input class="form-control" type="text" id="delete-user-id" disabled/>
+                            </div>
 
-                        <div class="d-flex justify-content-center">
-                            <div class="col-lg-5">
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-id">ID</label>
-                                    <input class="form-control" type="text" id="delete-user-id" disabled/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-name">Name</label>
+                                <input class="form-control" type="text" id="delete-user-name"  disabled/>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-name">Name</label>
-                                    <input class="form-control" type="text" id="delete-user-name"  disabled/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-email">E-mail</label>
+                                <input class="form-control" type="text" id="delete-user-email" disabled/>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-email">E-mail</label>
-                                    <input class="form-control" type="text" id="delete-user-email" disabled/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-phone">Phone Number</label>
+                                <input class="form-control" type="text" id="delete-user-phone" disabled/>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-phone-number">Phone Number</label>
-                                    <input class="form-control" type="text" id="delete-user-phone-number" disabled/>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-gender">Gender </label>
+                                <select class="form-select" id="delete-user-gender" disabled>
+                                    <option value="NOT_DEFINED" selected>Not Defined</option>
+                                    <option value="MALE"                >Male</option>
+                                    <option value="FEMALE"              >Female</option>
+                                </select>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-gender">Gender </label>
-                                    <select class="form-select" id="delete-user-gender" disabled>
-                                        <option value="NOT_DEFINED" selected>Not Defined</option>
-                                        <option value="MALE"                >Male</option>
-                                        <option value="FEMALE"              >Female</option>
-                                    </select>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-bdate">Date of Birth</label>
+                                <input class="form-control"
+                                       type="date"
+                                       id="delete-user-bdate"
+                                       min="1900-01-01"
+                                       max="2012-12-31" disabled/>
+                            </div>
 
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-date-of-birth">Date of Birth</label>
-                                    <input class="form-control"
-                                           type="date"
-                                           id="delete-user-date-of-birth"
-                                           min="1900-01-01"
-                                           max="2012-12-31" disabled/>
-                                </div>
-
-                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                    <label class="form-label" for="delete-user-role">Role</label>
-                                    <select class="form-select" id="delete-user-role" disabled>
-                                        <option value="ROLE_USER" selected>User </option>
-                                        <option value="ROLE_ADMIN"        >Admin</option>
-                                    </select>
-                                </div>
+                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                <label class="form-label" for="delete-user-role">Role</label>
+                                <select class="form-select" id="delete-user-role" disabled>
+                                    <option value="ROLE_USER" selected>User </option>
+                                    <option value="ROLE_ADMIN"        >Admin</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <input type="submit" class="btn btn-danger" value="Delete" />
-                </div>
-            </form>
-
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary close" data-bs-dismiss="modal">Close</button>
+                <input id="btn-delete-user" type="submit" class="btn btn-danger" value="Delete" />
+            </div>
         </div>
     </div>
 </div>

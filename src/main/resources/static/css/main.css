@@ -228,3 +228,7 @@ table.table tr {
 .btn-add {
     font-size: 1.25rem;
 }
+
+.alert {
+    display: none;
+}

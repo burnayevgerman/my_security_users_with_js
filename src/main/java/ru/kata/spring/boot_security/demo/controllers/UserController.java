@@ -15,31 +15,9 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-    private final UserServiceImpl userService;
-
-    public UserController(UserServiceImpl userService) {
-        this.userService = userService;
-    }
 
     @GetMapping
-    public String userInfo(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.getUserByEmail(auth.getName());
-
-        model.addAttribute("user", user);
-
-        model.addAttribute("roles", user.getRoles().stream()
-                .map(Role::getName).collect(Collectors.toSet()));
-
-        model.addAttribute("usersViewRoles", Map.of(
-                user.getId(),
-                user.getRoles()
-                        .stream()
-                        .map(Role::getViewText)
-                        .collect(Collectors.toSet())
-        ));
-
-        model.addAttribute("page", "PAGE_USER");
+    public String userInfo() {
         return "desktop";
     }
 }

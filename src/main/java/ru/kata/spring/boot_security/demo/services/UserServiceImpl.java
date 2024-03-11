@@ -76,8 +76,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public User updateUser(User user) {
+        if (user.getEmail().isEmpty()) {
+            return null;
+        }
+
         if (user.getPassword().isEmpty()) {
-            user.setPassword(userRepository.getById(user.getId()).getPassword());
+            user.setPassword(userRepository.findById(user.getId()).orElseThrow().getPassword());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
