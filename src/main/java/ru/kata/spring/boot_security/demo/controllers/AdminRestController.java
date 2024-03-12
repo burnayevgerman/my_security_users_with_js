@@ -57,19 +57,29 @@ public class AdminRestController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        user = userService.createUser(user);
+    public ResponseEntity<User> createUser(@RequestBody UserRequest userRequest) {
+        try {
+            User user = userRequest.getUser();
+            user.setRoles(new HashSet<>(Set.of(
+                    roleService.findRoleByName(userRequest.getTargetRole()))));
 
-        if (user == null) {
+            user = userService.createUser(user);
+
+            if (user == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            return ResponseEntity.created(
+                    ServletUriComponentsBuilder.fromCurrentRequest()
+                            .path("/user-info/{id}")
+                            .buildAndExpand(user.getId())
+                            .toUri()
+            ).body(user);
+        } catch (Exception e) {
+
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.created(
-                ServletUriComponentsBuilder.fromCurrentRequest()
-                        .path("/user-info/{id}")
-                        .buildAndExpand(user.getId())
-                        .toUri()
-        ).body(user);
     }
 
     private void logoutUser(HttpServletRequest request) {
@@ -81,62 +91,74 @@ public class AdminRestController {
     @PutMapping(path = "/edit")
     public ResponseEntity<User> editUser(@RequestBody UserRequest userRequest,
                                          Principal principal, HttpServletRequest request) {
-        User user = userRequest.getUser();
-        user.setRoles(new HashSet<>(Set.of(
-                roleService.findRoleByName(userRequest.getTargetRole()))));
+        try {
+            User user = userRequest.getUser();
+            user.setRoles(new HashSet<>(Set.of(
+                    roleService.findRoleByName(userRequest.getTargetRole()))));
 
-        boolean isCurrentUser = false;
+            boolean isCurrentUser = false;
 
-        if (userService.getUserByEmail(principal.getName()).getId().equals(user.getId())) {
-            isCurrentUser = true;
-        }
+            if (userService.getUserByEmail(principal.getName()).getId().equals(user.getId())) {
+                isCurrentUser = true;
+            }
 
-        user = userService.updateUser(user);
+            user = userService.updateUser(user);
 
-        if (user == null) {
+            if (user == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (isCurrentUser) {
+                SecurityContext securityContext = SecurityContextHolder.getContext();
+
+                if (!Set.of(securityContext.getAuthentication().getAuthorities()
+                                .stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toSet()))
+                        .equals(Set.of(user.getAuthorities()
+                                .stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toSet())))
+                        || !principal.getName().equals(user.getEmail())) {
+                    logoutUser(request);
+                    return ResponseEntity.noContent().build();
+                }
+            }
+
+            user.setPassword(null);
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
-
-        if (isCurrentUser) {
-            SecurityContext securityContext = SecurityContextHolder.getContext();
-
-            if (!Set.of(securityContext.getAuthentication().getAuthorities()
-                        .stream()
-                        .map(GrantedAuthority::getAuthority)
-                        .collect(Collectors.toSet()))
-                    .equals(Set.of(user.getAuthorities()
-                            .stream()
-                            .map(GrantedAuthority::getAuthority)
-                            .collect(Collectors.toSet())))
-                    || !principal.getName().equals(user.getEmail())) {
-                logoutUser(request);
-                return ResponseEntity.noContent().build();
-            }
-        }
-
-        user.setPassword(null);
-        return ResponseEntity.ok(user);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Long> deleteUser(@RequestParam("id") long id,
                                            Principal principal, HttpServletRequest request) {
-        User user = userService.getUserById(id);
+        try {
+            User user = userService.getUserById(id);
 
-        if (user == null) {
+            if (user == null) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            boolean currentUser = principal.getName().equals(user.getEmail());
+
+            if (!userService.deleteUserById(id)) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (currentUser) {
+                logoutUser(request);
+            }
+
+            return ResponseEntity.ok(id);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
-
-        boolean currentUser = principal.getName().equals(user.getEmail());
-
-        if (!userService.deleteUserById(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        if (currentUser) {
-            logoutUser(request);
-        }
-
-        return ResponseEntity.ok(id);
     }
 }

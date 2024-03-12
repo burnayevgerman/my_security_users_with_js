@@ -1,6 +1,7 @@
 var user, usersList;
 
 $(document).ready(async function () {
+    const html = $('html');
     let response = await fetch('/user/user-info');
     user = await response.json();
 
@@ -13,20 +14,71 @@ $(document).ready(async function () {
     fillAboutUser(user);
 
     if (isAdmin(user)) {
+        activateMenuItem('#ref-to-admin-panel');
         fillUsersTable(usersList);
 
-        $('.btn-edit').click(async function () {
+        html.on('click', '#ref-to-admin-panel', function () {
+            activateMenuItem('#ref-to-admin-panel');
+        });
+        html.on('click', '#ref-to-about-user', function () {
+            activateMenuItem('#ref-to-about-user');
+        });
+
+        html.on('click', '#nav-btn-create', resetCreateForm);
+
+        html.on('click', '.btn-edit', async function () {
             await openEditModal( $(this).data('bs-user-id'));
         });
-        $('.btn-delete').click(async function () {
+        html.on('click', '.btn-delete', async function () {
             await openDeleteModal( $(this).data('bs-user-id'));
         });
 
-        $('#btn-edit-user').click(sendEditForm);
-        $('#btn-delete-user').click(sendDeleteForm);
+        html.on('click', '#btn-edit-user', sendEditForm);
+        html.on('click', '#btn-delete-user', sendDeleteForm);
+        html.on('click', '#btn-create-user', sendCreateForm);
+    } else {
+        // if ROLE_USER
+
+        activateMenuItem('#ref-to-about-user');
+        $('li #ref-to-admin-panel').remove();
+        $('#admin-panel-tab-pane').remove();
+        $('#edit-user-modal').remove();
+        $('#delete-user-modal').remove();
     }
 
 });
+
+function activateMenuItem(refToItem) {
+    if (refToItem === '#ref-to-admin-panel') {
+        $('#admin-panel-tab-pane').show();
+        $('#about-user-tab-pane').hide();
+
+        let ref_to_admin_panel = $('#ref-to-admin-panel');
+        let ref_to_about_user = $('#ref-to-about-user');
+
+        if (!ref_to_admin_panel.hasClass('active')) {
+            ref_to_admin_panel.addClass('active');
+        }
+
+        if (ref_to_about_user.hasClass('active')) {
+            ref_to_about_user.removeClass('active');
+        }
+    } else if (refToItem === '#ref-to-about-user') {
+        $('#admin-panel-tab-pane').hide();
+        $('#about-user-tab-pane').show();
+
+        let ref_to_admin_panel = $('#ref-to-admin-panel');
+        let ref_to_about_user = $('#ref-to-about-user');
+
+        if (!ref_to_about_user.hasClass('active')) {
+            ref_to_about_user.addClass('active');
+        }
+
+        if (ref_to_admin_panel.hasClass('active')) {
+            ref_to_admin_panel.removeClass('active');
+        }
+    }
+}
 
 async function openEditModal(userId) {
     let cUser = await getUserById(userId);
@@ -102,9 +154,8 @@ async function getUserById(id) {
 
 function fillHeaderAndTitle() {
     if (isAdmin(user)) {
-        $('.fill-title').text('Admin Panel');
+        $('title').text('Admin Panel');
     } else {
-        $('.fill-title').text('User Information-Page');
         $('title').text('User Page');
     }
 
@@ -188,6 +239,16 @@ function fillUsersTable(uList) {
     });
 }
 
+function resetCreateForm() {
+    $('#create-user-name').val('');
+    $('#create-user-email').val('');
+    $('#create-user-phone').val('');
+    $('#create-user-gender option[value="ROLE_USER"]').prop('selected', true);
+    $('#create-user-bdate').val('');
+    $('#create-user-password').val('');
+    $('#create-user-role option[value="NOT_DEFINED"]').prop('selected', true);
+}
+
 function fillModalEdit(cUser) {
     $('#edit-user-id').val(cUser['id']);
     $('#edit-user-name').val(cUser.name);
@@ -236,6 +297,70 @@ function updateUser(newUser) {
             $(this).text(getRolesText(newUser.roles));
         }
     });
+}
+
+function addUser(newUser) {
+    let table = $('#users-list');
+    let row = $('<tr>').attr('user-id', newUser.id);
+    row.append( $('<td>')
+        .text(newUser.id)
+        .addClass('td-id')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(newUser.name)
+        .addClass('td-name')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(newUser.email)
+        .addClass('td-email')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(newUser.phoneNumber)
+        .addClass('td-phone')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(getGenderText(newUser.gender))
+        .addClass('td-gender')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(getDateText(newUser.dateOfBirth))
+        .addClass('td-bdate')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>')
+        .text(getRolesText(newUser.roles))
+        .addClass('td-roles')
+        .attr('user-id', newUser.id));
+    row.append( $('<td>').html(function () {
+        let b = $('<button>');
+
+        b.addClass('btn-edit');
+        b.addClass('btn');
+        b.addClass('btn-info');
+        b.addClass('p-2');
+
+        b.attr('data-bs-toggle', 'modal');
+        b.attr('data-bs-target', '#edit-user-modal');
+        b.attr('data-bs-user-id', newUser.id);
+
+        b.text('Edit');
+        return b;
+    }));
+    row.append( $('<td>').html(function () {
+        let b = $('<button>');
+
+        b.addClass('btn-delete');
+        b.addClass('btn');
+        b.addClass('btn-danger');
+        b.addClass('p-2');
+
+        b.attr('data-bs-toggle', 'modal');
+        b.attr('data-bs-target', '#delete-user-modal');
+        b.attr('data-bs-user-id', newUser.id);
+
+        b.text('Delete');
+        return b;
+    }));
+    table.append(row);
 }
 
 function showElementBriefly (element) {
@@ -313,5 +438,41 @@ async function sendDeleteForm() {
     } else {
         await openDeleteModal(id);
         showElementBriefly( $('#alert-delete-error'));
+    }
+}
+
+async function sendCreateForm() {
+    let newUser = {
+        name: $('#create-user-name').val(),
+        email: $('#create-user-email').val(),
+        phoneNumber: $('#create-user-phone').val(),
+        gender: $('#create-user-gender').val(),
+        dateOfBirth: $('#create-user-bdate').val(),
+        password: $('#create-user-password').val()
+    };
+    let userRequest = {
+        user: newUser,
+        targetRole: $('#create-user-role').val()
+    };
+
+    let response = await fetch('/admin/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+        },
+        body: JSON.stringify(userRequest)
+    });
+
+    if (response.ok) {
+        newUser = await response.json();
+        addUser(newUser);
+
+        $('#nav-btn-table').click();
+
+        let alert = $('#alert-create-success');
+        alert.text('Success created a user with id: ' + newUser.id);
+        showElementBriefly(alert);
+    } else {
+        showElementBriefly( $('#alert-create-failed'));
     }
 }

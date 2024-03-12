@@ -50,14 +50,6 @@
 </div>
 
 <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-<!--    <ul class="navbar-nav flex-row d-md-none">-->
-<!--        <li class="nav-item text-nowrap">-->
-<!--            <button class="nav-link px-3 text-white" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">-->
-<!--                <svg class="bi"><use xlink:href="#list"/></svg>-->
-<!--            </button>-->
-<!--        </li>-->
-<!--    </ul>-->
-
     <a class="navbar-brand me-0 px-3 fs-6 text-white" href="#">
         <span class="fill-header-email fw-bold">***@**.**</span>
         <span class="fill-header-roles">with roles: ?, ?</span>
@@ -70,22 +62,22 @@
     <div class="row">
         <div class="left-menu col-lg-2 col-md-2">
             <ul class="nav flex-column">
-                <li class="nav-item" sec:authorize="hasRole('ROLE_ADMIN')">
-                    <a class="nav-link active"
-                       aria-current="page"
-                       th:href="@{/admin}">Admin</a>
+                <li class="nav-item">
+                    <a id="ref-to-admin-panel"
+                       class="nav-link active"
+                       href="#"
+                       aria-current="page">Admin</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link"
-                       aria-current=""
-                       th:href="@{/user}">User</a>
+                    <a id="ref-to-about-user"
+                       class="nav-link"
+                       href="#"
+                       aria-current="">User</a>
                 </li>
             </ul>
         </div>
 
         <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
-            <h1 class="fill-title">? Panel</h1>
-
             <div id="alert-create-success"
                  class="alert alert-success mb-3"
                  role="alert">Success created new user with id: </div>
@@ -96,50 +88,23 @@
                  class="alert alert-success mb-3"
                  role="alert">Success deleted a user with id: </div>
 
-            <div class="about-user">
-                <div class="frame">
-                    <div class="header">About User</div>
+            <div    id="admin-panel-tab-pane" class="admin-panel"
+                    aria-labelledby="admin-panel-tab" tabindex="0">
 
-                    <div class="content">
-                        <table class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Name</th>
-                                <th scope="col">E-mail</th>
-                                <th scope="col">Phone Number</th>
-                                <th scope="col">Gender</th>
-                                <th scope="col">Date Of Birth</th>
-                                <th scope="col">Role</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td class="fill-user-id">Id ?</td>
-                                <td class="fill-user-name">Name ?</td>
-                                <td class="fill-user-email">E-mail ?</td>
-                                <td class="fill-user-phone">Phone Number ?</td>
-                                <td class="fill-user-gender">Gender ?</td>
-                                <td class="fill-user-bdate">Date Of Birth ?</td>
-                                <td class="fill-user-roles">Roles ?</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+                <h1>Admin Panel</h1>
 
-            <div sec:authorize="hasRole('ROLE_ADMIN')" class="admin-panel">
                 <ul class="nav nav-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active"
+                        <button id="nav-btn-table"
+                                class="nav-link active"
                                 data-bs-toggle="tab"
                                 data-bs-target="#users-table-tab-pane"
                                 type="button" role="tab"
                                 aria-controls="users-table-tab-pane">Users Table</button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link"
+                        <button id="nav-btn-create"
+                                class="nav-link"
                                 data-bs-toggle="tab"
                                 data-bs-target="#new-user-tab-pane"
                                 type="button"
@@ -195,60 +160,58 @@
 
                                 <div class="d-flex justify-content-center">
                                     <div class="form-user-column col-lg-3">
-                                        <form id="form-create-user">
-                                            <div class="flex-column d-flex align-items-center">
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-name">Name</label>
-                                                    <input class="form-control" type="text" id="create-user-name" />
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-email">E-mail</label>
-                                                    <input class="form-control" type="text" id="create-user-email" />
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-phone">Phone Number</label>
-                                                    <input class="form-control" type="text" id="create-user-phone" />
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-gender">Gender </label>
-                                                    <select class="form-select" id="create-user-gender">
-                                                        <option value="NOT_DEFINED" selected>Not Defined</option>
-                                                        <option value="MALE"                >Male</option>
-                                                        <option value="FEMALE"              >Female</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-bdate">Date of Birth</label>
-                                                    <input class="form-control"
-                                                           type="date"
-                                                           id="create-user-bdate"
-                                                           min="1900-01-01"
-                                                           max="2012-12-31" />
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="create-user-password">Password</label>
-                                                    <input class="form-control" type="password" id="create-user-password" />
-                                                </div>
-
-                                                <div class="mb-4 flex-column d-flex align-items-center w-100">
-                                                    <label class="form-label" for="roles">Roles</label>
-                                                    <select class="form-select" name="selectedRole" id="roles">
-                                                        <option value="ROLE_USER" selected>User </option>
-                                                        <option value="ROLE_ADMIN"        >Admin</option>
-                                                    </select>
-                                                </div>
-
-                                                <input id="btn-create-user"
-                                                       class="btn-add btn btn-success py-2 px-3"
-                                                       type="submit"
-                                                       value="Add New User" />
+                                        <div class="flex-column d-flex align-items-center">
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-name">Name</label>
+                                                <input class="form-control" type="text" id="create-user-name" />
                                             </div>
-                                        </form>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-email">E-mail</label>
+                                                <input class="form-control" type="text" id="create-user-email" />
+                                            </div>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-phone">Phone Number</label>
+                                                <input class="form-control" type="text" id="create-user-phone" />
+                                            </div>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-gender">Gender </label>
+                                                <select class="form-select" id="create-user-gender">
+                                                    <option value="NOT_DEFINED" selected>Not Defined</option>
+                                                    <option value="MALE"                >Male</option>
+                                                    <option value="FEMALE"              >Female</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-bdate">Date of Birth</label>
+                                                <input class="form-control"
+                                                       type="date"
+                                                       id="create-user-bdate"
+                                                       min="1900-01-01"
+                                                       max="2012-12-31" />
+                                            </div>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-password">Password</label>
+                                                <input class="form-control" type="password" id="create-user-password" />
+                                            </div>
+
+                                            <div class="mb-4 flex-column d-flex align-items-center w-100">
+                                                <label class="form-label" for="create-user-role">Role</label>
+                                                <select class="form-select" id="create-user-role">
+                                                    <option value="ROLE_USER" selected>User </option>
+                                                    <option value="ROLE_ADMIN"        >Admin</option>
+                                                </select>
+                                            </div>
+
+                                            <input id="btn-create-user"
+                                                   class="btn-add btn btn-success py-2 px-3"
+                                                   type="submit"
+                                                   value="Add New User" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -256,12 +219,47 @@
                     </div>
                 </div>
             </div>
+
+            <div    id="about-user-tab-pane" class="about-user"
+                    aria-labelledby="about-user-tab" tabindex="0">
+                <h1>User Information-Page</h1>
+
+                <div class="frame">
+                    <div class="header">About User</div>
+
+                    <div class="content">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">E-mail</th>
+                                <th scope="col">Phone Number</th>
+                                <th scope="col">Gender</th>
+                                <th scope="col">Date Of Birth</th>
+                                <th scope="col">Role</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td class="fill-user-id">Id ?</td>
+                                <td class="fill-user-name">Name ?</td>
+                                <td class="fill-user-email">E-mail ?</td>
+                                <td class="fill-user-phone">Phone Number ?</td>
+                                <td class="fill-user-gender">Gender ?</td>
+                                <td class="fill-user-bdate">Date Of Birth ?</td>
+                                <td class="fill-user-roles">Roles ?</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 </div>
 
-<div    sec:authorize="hasRole('ROLE_ADMIN')"
-        class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+<div class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
 
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -342,8 +340,7 @@
     </div>
 </div>
 
-<div    sec:authorize="hasRole('ROLE_ADMIN')"
-        class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
+<div class="modal fade" id="delete-user-modal" tabindex="-1" aria-labelledby="delete-user-title" aria-hidden="true">
 
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

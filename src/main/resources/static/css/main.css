@@ -1,3 +1,7 @@
+html, body, .container-fluid, .row {
+    height: 100%;
+}
+
 [data-bs-theme=light] body {
     background-color: #F8F9FA;
 }
@@ -149,12 +153,12 @@
 
 [data-bs-theme=dark] .left-menu {
     background-color: #181818;
-    height: 100vh;
+    /*height: 100vh;*/
 }
 
 [data-bs-theme=light] .left-menu {
     background-color: white;
-    height: 100vh;
+    /*height: 100vh;*/
 }
 
 .left-menu > .nav {
@@ -172,7 +176,7 @@ main {
 }
 
 main h1 {
-    padding: .75rem .75rem 0;
+    padding: 0 0 .75rem;
 }
 
 .about-user {
